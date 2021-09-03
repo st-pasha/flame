@@ -136,7 +136,12 @@ class Camera extends Projector {
   /// The zoom from the camera is only for components that respect camera,
   /// and is applied after the viewport is set. It exists to be used if there
   /// is any kind of user configurable camera on your game.
-  double zoom = 1.0;
+  double get zoom => zoomVector[0];
+  set zoom(double value) {
+    zoomVector.setValues(value, value);
+  }
+
+  Vector2 zoomVector = Vector2.all(1);
 
   Camera();
 
@@ -148,22 +153,21 @@ class Camera extends Projector {
   /// When using this method you are responsible for saving/restoring canvas
   /// state to avoid leakage.
   void apply(Canvas canvas) {
-    canvas.transform(_transformMatrix(position, zoom).storage);
+    canvas.transform(_transformMatrix().storage);
   }
 
-  Matrix4 _transformMatrix(Vector2 position, double zoom) {
-    final translateX = -_position.x * zoom;
-    final translateY = -_position.y * zoom;
-    if (_transform.m11 == zoom &&
-        _transform.m22 == zoom &&
-        _transform.m33 == zoom &&
+  Matrix4 _transformMatrix() {
+    final translateX = -_position.x * zoomVector.x;
+    final translateY = -_position.y * zoomVector.y;
+    if (_transform.m11 == zoomVector.x &&
+        _transform.m22 == zoomVector.y &&
         _transform.m41 == translateX &&
         _transform.m42 == translateY) {
       return _transform;
     }
     _transform.setIdentity();
     _transform.translate(translateX, translateY);
-    _transform.scale(zoom, zoom, 1);
+    _transform.scale(zoomVector.x, zoomVector.y, 1);
     return _transform;
   }
 
